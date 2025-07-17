@@ -5,7 +5,7 @@ The goal is to identify trends by **month** and **time of day**, and to visualiz
 
 ## Files
 
-- `NYC_Flights_Delay_Analysis.Rmd` : R Markdown analysis report  
+- [`NYC_Flights_Delay_Analysis.Rmd`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/NYC13_Flights_Delay_Analysis.Rmd) : R Markdown analysis report  
 - `NYC_Flights_Delay_Analysis.html` : Rendered HTML report  
 
 ## Data Source
