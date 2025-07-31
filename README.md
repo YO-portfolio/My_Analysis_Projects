@@ -20,5 +20,5 @@ The goal is to identify trends by **month** and **time of day**, and to visualiz
 ## How to Reproduce
 
 1. Install R and RStudio.
-2. Install required packages: `tidyverse`, `lubridate`, `nycflights13`.
+2. Install required packages: `tidyverse`, `nycflights13`.
 3. Open the `.Rmd` file and knit to HTML.
