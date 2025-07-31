@@ -1,0 +1,337 @@
+---
+title: "Exploratory Data Analysis and Regression of NYC Flight Delays"
+author: "Yoshiki Okada"
+date: "2025-07-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("tidyverse")  
+library("conflicted")
+library("nycflights13")
+library("lubridate")
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Introduction**
+
+This report analyzes flight delay patterns at New York City airports using the nycflights13 dataset, which contains detailed flight information for all NYC departures in 2013. The analysis focuses on monthly and time-of-day variations in delay rates and average delay durations to reveal key trends. This project demonstrates fundamental data analysis and visualization skills relevant to real-world business contexts.
+<br><br>
+
+## **Data Source**
+
+The data used in this analysis is sourced from the R package **nycflights13** (Wickham, 2018), which is publicly available on CRAN:
+
+-   Package URL: <https://CRAN.R-project.org/package=nycflights13>
+<br><br>
+
+## **Data Overview**
+
+The nycflights13 dataset includes detailed information on over 300,000 flights departing from New York City airports (JFK, LGA, EWR) in 2013. For this analysis, the following variables are used:
+
+- year, month, day: Flight date
+
+- carrier: Airline carrier code
+
+- sched_dep_time: Scheduled departure time
+
+- dep_time: Actual departure time
+
+- origin: Departure airport (JFK, LGA, EWR)
+
+- dest: Destination airport
+
+Other variables are not used in this analysis.
+<br><br>
+
+## **Data Cleaning and Preparation**
+
+The dataset originally contained several variables, some of which were not relevant to this analysis and were therefore removed. Missing and infinite values were checked and omitted to ensure data integrity.
+
+Since all flights originate from New York City airports (origin = "JFK", "LGA", "EWR"), variables related to arrival times, distance, and air time were considered unnecessary and excluded.
+
+Additionally, variables such as tail number and flight number, which are specific identifiers for each flight, were excluded as they do not contribute to the aggregate analysis of delay patterns by month and time slot.
+
+```{r cleaning and preparation}
+library("nycflights13")
+
+flight_df <- flights %>%
+  na.omit()
+
+flight_remove_unnec <- flight_df %>%
+  select(-c(flight, tailnum, air_time, distance))
+
+flight_use <- flight_remove_unnec %>%
+  select(-c(arr_time, arr_delay, sched_arr_time, hour, minute))
+```
+<br><br>
+
+## **Explanation of Analytical Methods**
+
+In this analysis, I applied regression model to investigate the factors affecting flight delays.
+
+**Methods used:** I performed visualizations, such as graphs, to intuitively capture the overall patterns and relationships between flight delay metrics and individual predictors like month or time slot. These visualizations allow for a clear, intuitive understanding of how each factor relates to delays. Subsequently, I constructed a multiple linear regression model to quantitatively analyze the combined effect of both month and time slot on delay outcomes. I chose not to conduct separate simple linear regressions because the multiple regression model sufficiently captures the meaningful effects of these variables both individually and jointly.
+
+**Purpose of models:** The visualizations provide an intuitive grasp of each factor’s influence on delays, helping to reveal patterns and potential relationships at a glance. The multiple regression model then offers a more rigorous, numerical evaluation of these effects, accounting for confounding factors by examining the variables simultaneously.
+
+**Model Overview:** I performed a multiple linear regression to examine how delay rates vary by month and time of day. The model treats January and the Morning time slot as reference categories, and estimates the additional impact of other months and time slots on the delay rate. 
+
+Note: Time slots are based on the actual operating conditions of the airport and are not evenly spaced, but rather are divided according to “actual flight concentration times”.
+<br><br>
+
+## **Results and Code**
+
+This section first visualizes flight delay patterns by month and time of day, then explores their combined effects through additional visualizations, and finally conducts a multiple regression analysis to quantify the impact of both factors on delay rates.
+<br><br>
+
+#### **Step 1: Monthly Analysis**
+
+**Data Aggregation:**
+
+I first calculated the monthly number of flights and categorized them into delayed and on-time flights.
+
+```{r}
+mflight_nom_del <- flight_use %>%
+  group_by(month) %>%
+  summarise(f_num = n(), 
+            f_delay = sum(dep_delay > 0, na.rm = TRUE),
+            f_normal = f_num - f_delay)
+```
+
+Then, I transformed the data into long format to prepare for visualization.
+
+```{r}
+mflight_nom_del_long <- mflight_nom_del %>%
+  pivot_longer(cols = c(f_delay, f_normal),
+               names_to = "status",
+               values_to = "count") %>%
+  mutate(status = factor(status, levels = c("f_normal", "f_delay")))
+```
+
+Calculation of the delay rate.
+
+```{r}
+mflight_del_rate <- mflight_nom_del_long %>%
+  filter(status == "f_delay") %>%
+  mutate(delay_rate = count/f_num)
+```
+
+**Visualization: Graph**
+
+```{r}
+ggplot(data = mflight_nom_del_long, 
+       aes(x = factor(month) , 
+           y = count, 
+           fill = status)) + 
+  geom_col(position = "stack") +
+  geom_text(data = mflight_del_rate, 
+            aes(x = factor(month), 
+                y = count/2, 
+                label = paste0(round(delay_rate * 100, 1), "%")),
+            color = "black", 
+            size = 3) + 
+  labs(title = "Monthly Flights: Delay and Normal",
+       x = "Month",
+       y = "Number of Flights") + 
+  scale_fill_manual(values = c("f_delay" = "red", "f_normal" = "blue"), 
+                    labels = c("On Time", "Delayed")) + 
+  theme_minimal()
+```
+
+**Interpretation:**
+
+- Delay rates has been gradually increasing from April to July (Peak at July). Its rates were relatively low from September to November, rose sharply in December.
+<br><br>
+
+#### **Step 2: Time Slots Analysis**
+
+**Data Aggregation:**
+
+This section applies the same aggregation process as previously described.
+
+```{r time-slot, include=FALSE}
+
+t_zone_flight <- flight_use %>%
+  mutate(time_slot = case_when(sched_dep_time >= 500 & sched_dep_time < 1200 ~ "Morning",
+                               sched_dep_time >= 1200 & sched_dep_time < 1700 ~ "Afternoon",
+                               sched_dep_time >= 1700 & sched_dep_time < 2100 ~ "Evening",
+                               TRUE ~ "Night"))
+
+
+tzflight_nom_del <- t_zone_flight %>%
+  group_by(time_slot) %>%
+  summarise(f_num = n(), 
+            f_delay = sum(dep_delay > 0, na.rm = TRUE),
+            f_normal = f_num - f_delay)
+
+
+
+tzflight_nom_del_long <- tzflight_nom_del %>%
+  pivot_longer(cols = c(f_delay, f_normal),
+               names_to = "status",
+               values_to = "count") %>%
+  mutate(status = factor(status, levels = c("f_normal", "f_delay")),
+         time_slot = factor(time_slot, levels = c("Morning", "Afternoon", "Evening", "Night")))
+
+
+
+tzflight_del_rate <- tzflight_nom_del_long %>%
+  filter(status == "f_delay") %>%
+  mutate(delay_rate = count/f_num)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Visualization: Graph**
+
+```{r}
+
+# time_slot variable defined based on actual flight concentration times
+
+ggplot(data = tzflight_nom_del_long, aes(x = factor(time_slot) 
+                                        , y = count, fill = status)) + 
+  geom_col(position = "stack") +
+  geom_text(data = tzflight_del_rate, 
+            aes(x = factor(time_slot), y = count/2, 
+                label = paste0(round(delay_rate * 100, 1), "%")),
+            color = "black", size = 3) + 
+  scale_y_continuous(labels = scales::comma,
+                     breaks = seq(0, 150000, by = 25000),
+                     limits = c(0, 150000)) + 
+  labs(title = "Time Slot Flights: Delay and Normal",
+       x = "Time Slot",
+       y = "Number of Flights",
+       caption = "Time Slots: Morning (5:00 - 11:59), Afternoon (12:00-16:59), Evening (17:00-20:59), Night (21:00-23:59)") + 
+  scale_fill_manual(values = c("f_delay" = "red", "f_normal" = "blue"), 
+                    labels = c("On Time", "Delayed")) + 
+  theme_minimal()
+```
+
+**Interpretation:**
+
+- The number of flights decreases in the morning, afternoon, evening, and night, while the delay rate is by far the lowest in the morning.
+
+Note:the number of flights is skewed by time slots because its divisions are not equal in duration.
+<br><br>
+
+#### **Step 3: Monthly x Time Slots Analysis**
+
+**Data Aggregation:**
+
+This section applies the same aggregation process as previously described.
+
+```{r  mon-time, include=FALSE}
+
+tzmflight_nom_del <- t_zone_flight %>%
+  group_by(month, time_slot) %>%
+  summarise(f_num = n(), 
+            f_delay = sum(dep_delay > 0, na.rm = TRUE),
+            f_normal = f_num - f_delay)
+
+
+tzmflight_nom_del_long <- tzmflight_nom_del %>%
+  pivot_longer(cols = c(f_delay, f_normal),
+               names_to = "status",
+               values_to = "count") %>%
+  mutate(status = factor(status, levels = c("f_normal", "f_delay")),
+         time_slot = factor(time_slot, levels = c("Morning", "Afternoon", "Evening", "Night")))
+
+  
+
+tzmflight_del_rate <- tzmflight_nom_del_long %>%
+  filter(status == "f_delay") %>%
+  mutate(delay_rate = count/f_num)
+
+
+
+tzmflight_nom_del_long_edt2 <- tzmflight_nom_del_long %>%
+  left_join(tzmflight_del_rate %>%
+              select(month, time_slot, delay_rate), 
+            by = c("month", "time_slot"))
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Visualization: Graph**
+
+```{r}
+ggplot(data = tzmflight_nom_del_long_edt2, aes(x = factor(month), y = time_slot, fill = delay_rate)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "red", labels = scales::percent_format()) +
+  labs(title = "Monthly Delay Rates by Time Slot",
+       x = "Month", y = "Time Slot", fill = "Delay Rate") +
+  theme_minimal()
+```
+
+**Interpretation:**
+
+- Throughout the year, the delay rate is low in the morning hours. The months with the lowest delay rates, regardless of time of day, are September through November.
+<br><br>
+
+#### **Step 4: Regression Analysis**
+
+I conducted a multiple regression to quantify the effects of month and time slot on delay rates.
+
+```{r}
+model_tzm <- lm(delay_rate*100 ~ factor(month) + factor(time_slot), data = tzmflight_nom_del_long_edt2)
+
+summary(model_tzm)
+
+```
+
+**Model Summary:**
+
+The regression model explains a significant portion of the variation in delay rate. The R-squared value is 0.9403, indicating that about 94% of the variance is explained by the model. The F-statistic (91.14, p \< 0.001) confirms the overall significance of the model. The Residual Standard Error (3.537) suggests that the typical prediction error is about 3.5 percentage points in delay rate.
+<br><br>
+
+**Interpretation:**
+
+- The intercept indicates the baseline delay rate for January morning flights, estimated at 21.44%.
+
+- June flights have a 13.31 percentage point increase in delay rate compared to January (assuming the same time of day).
+
+- Evening flights are associated with a 25.88 percentage point increase in delay rate compared to morning flights.
+
+- December shows an exceptionally high delay rate, nearly reaching the peak in July, with only about a 2 percentage point difference. This may be due to holiday travel congestion or weather-related disruptions.
+
+- Overall, the model confirms that both month and time of day significantly influence delay rates at NYC airports. Delays are more likely in summer, during evening time slots, and in December.
+<br><br>
+
+## **Conclusion**
+
+#### **Key Findings:**
+
+- This analysis highlights clear seasonal and daily time patterns in flight delay rates at NYC airports.
+
+- Summer months and evening flights consistently show higher delay rates, confirming known operational stress periods.
+
+- December stands out with a delay rate nearly as high as the peak in July, likely due to holiday travel demand and winter weather challenges.
+<br><br>
+
+#### **Implications:**
+
+- Travel agencies and airport authorities can use these insights to better anticipate and mitigate delay risks, especially during peak seasons and specific time slots.
+
+- Further, analyzing delay patterns by airline could provide more customized strategies for specific carriers.
+<br><br>
+
+#### **Limitations:**
+
+- The analysis uses aggregated data by month and time slot, which may mask finer-grained variations such as specific days or weather events.
+
+- Important factors like weather conditions, airline-specific policies, and air traffic control interventions were not included and could affect delay patterns.
+
+- The model assumes additive effects of month and time slot without interaction terms, which may oversimplify complex dependencies.
+<br><br>
+
+#### **Future Work:**
+
+- Incorporating more granular time units (e.g., daily or hourly) and additional variables such as weather data could enhance predictive accuracy.
+
+- Examining airline-specific delay patterns might reveal operational differences valuable for targeted interventions.
+
+- Exploring interaction effects between month and time slot could provide deeper understanding of delay dynamics.
+<br><br>
