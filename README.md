@@ -4,9 +4,12 @@ This project analyzes flight delay patterns at New York City airports using the 
 The goal is to identify trends by **month** and **time of day**, and to visualize these patterns for better decision-making in travel planning.
 
 ## Files
+
+### English Version
 - [`NYC_Flights_Delay_Analysis.Rmd`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/NYC13_Flights_Delay_Analysis.Rmd) : R Markdown analysis report  
 - [`NYC_Flights_Delay_Analysis.html`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/NYC13_Flights_Delay_Analysis.html) : Rendered HTML report  
 
+### (Japanese Version)
 
 
 ## Data Source
