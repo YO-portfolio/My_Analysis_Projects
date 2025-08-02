@@ -41,7 +41,7 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 - Data License: CC0 (Public Domain)
 
 ### Project 2:
-- Data from Inside Airbnb (Bristol) [`listings.csv.gz`](https://insideairbnb.com/get-the-data/).
+- Data from Inside Airbnb (Bristol) [`listings.csv.gz`](https://insideairbnb.com/get-the-data/)
 - Data License: CC BY 4.0
 
 ## How to Reproduce
