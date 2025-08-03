@@ -75,7 +75,7 @@ In this analysis, I applied regression model to investigate the factors affectin
 
 **Methods used:** I performed visualizations, such as graphs, to intuitively capture the overall patterns and relationships between flight delay metrics and individual predictors like month or time slot. These visualizations allow for a clear, intuitive understanding of how each factor relates to delays. Subsequently, I constructed a multiple linear regression model to quantitatively analyze the combined effect of both month and time slot on delay outcomes. I chose not to conduct separate simple linear regressions because the multiple regression model sufficiently captures the meaningful effects of these variables both individually and jointly.
 
-**Purpose of models:** The visualizations provide an intuitive grasp of each factor’s influence on delays, helping to reveal patterns and potential relationships at a glance. The multiple regression model then offers a more rigorous, numerical evaluation of these effects, accounting for confounding factors by examining the variables simultaneously.
+**Purpose of Methods:** The visualizations provide an intuitive grasp of each factor’s influence on delays, helping to reveal patterns and potential relationships at a glance. The multiple regression model then offers a more rigorous, numerical evaluation of these effects, accounting for confounding factors by examining the variables simultaneously.
 
 **Model Overview:** I performed a multiple linear regression to examine how delay rates vary by month and time of day. The model treats January and the Morning time slot as reference categories, and estimates the additional impact of other months and time slots on the delay rate. 
 
@@ -335,4 +335,5 @@ The regression model explains a significant portion of the variation in delay ra
 
 - Exploring interaction effects between month and time slot could provide deeper understanding of delay dynamics.
 <br><br>
+
 
