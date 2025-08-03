@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## **Introduction**
 
-This report analyzes flight delay patterns at New York City airports using the nycflights13 dataset, which contains detailed flight information for all NYC departures in 2013. The analysis focuses on monthly and time-of-day variations in delay rates and average delay durations to reveal key trends. This project demonstrates fundamental data analysis and visualization skills relevant to real-world business contexts.
+This report analyzes flight delay patterns at New York City airports using the nycflights13 dataset, which contains detailed flight information for all NYC departures in 2013. The analysis focuses on monthly and time-of-day variations in delay rates to reveal key trends. This project demonstrates fundamental data analysis and visualization skills relevant to real-world business contexts.
 <br><br>
 
 ## **Data Source**
@@ -335,3 +335,4 @@ The regression model explains a significant portion of the variation in delay ra
 
 - Exploring interaction effects between month and time slot could provide deeper understanding of delay dynamics.
 <br><br>
+
