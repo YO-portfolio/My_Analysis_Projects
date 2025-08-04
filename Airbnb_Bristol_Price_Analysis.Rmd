@@ -130,7 +130,7 @@ These analyses aimed to explore the general relationships between price and sele
 
 ## **Results and Code**
 
-In this section, I present the code and visualizations based on the previously described analytical methods.\
+In this section, I present the code and visualizations based on the previously described analytical methods.
 The results and interpretations follow each output accordingly.
 
 Note: Regression outputs are omitted throughout this section for clarity and consistency, as they are lengthy and not visually interpretable. Key insights are summarized in the interpretation. <br><br>
@@ -340,4 +340,5 @@ Based on the results of the foregoing analyses, it can be concluded that the num
 
 -   Explore qualitative factors, such as host experience or guest satisfaction, potentially through sentiment analysis of reviews, to supplement numerical data with richer insights. 
 <br><br>
+
 
