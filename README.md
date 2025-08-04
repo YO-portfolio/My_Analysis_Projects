@@ -21,7 +21,7 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 - [`NYC_Flights_Delay_Analysis.Rmd`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/NYC13_Flights_Delay_Analysis.Rmd) : R Markdown analysis report  
 - [`NYC_Flights_Delay_Analysis.html`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/NYC13_Flights_Delay_Analysis.html) : Rendered HTML report  
 
-#### (Japanese Version)
+#### 日本語版(Japanese Version)
 - 
 - 
 
@@ -30,7 +30,7 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 - [`Airbnb_Bristol_Price_Analysis.Rmd`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/Airbnb_Bristol_Price_Analysis.Rmd) : R Markdown analysis report
 - [`Airbnb_Bristol_Price_Analysis.html`](Airbnb_Bristol_Price_Analysis.html) : Rendered HTML report 
 
-#### (Japanese Version)
+#### 日本語版(Japanese Version)
 - 
 - 
 
