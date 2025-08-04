@@ -2,7 +2,6 @@
 
 This repository contains multiple data analysis projects, each with its own focus and dataset.
 Below is a summary of each project along with relevant files and data sources.
-NYC Flights Delay Analysis
 
 
 ## Projects
