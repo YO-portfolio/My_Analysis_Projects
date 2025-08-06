@@ -18,7 +18,8 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 ### Project 1: 
 #### English Version
 - [`NYC_Flights_Delay_Analysis.Rmd`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/NYC13_Flights_Delay_Analysis.Rmd) : R Markdown analysis report  
-- [`NYC_Flights_Delay_Analysis.html`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/NYC13_Flights_Delay_Analysis.html) : Rendered HTML report  
+- [`NYC_Flights_Delay_Analysis.html`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/NYC13_Flights_Delay_Analysis.html) : Rendered HTML report
+- [`Flight Delays and Volumes in NYC Airports - 2013 Overview`](https://public.tableau.com/app/profile/yoshiki.okada7932/viz/FlightDelaysandVolumesinNYCAirports-2013Overview/1_1) : Tableau dashboard
 
 #### 日本語版(Japanese Version)
 - [`ニューヨーク市内の空港における遅延率に関する分析.Rmd`](ニューヨーク市内の空港における遅延率に関する分析.Rmd)：Rマークダウン形式
