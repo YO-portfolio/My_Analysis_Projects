@@ -130,7 +130,7 @@ These analyses aimed to explore the general relationships between price and sele
 
 ## **Results and Code**
 
-In this section, I present the code and visualizations based on the previously described analytical methods.
+In this section, I present the code and visualizations based on the previously described analytical methods.\
 The results and interpretations follow each output accordingly.
 
 Note: Regression outputs are omitted throughout this section for clarity and consistency, as they are lengthy and not visually interpretable. Key insights are summarized in the interpretation. <br><br>
@@ -174,7 +174,7 @@ ggplot() +
 
 #### **Note:**
 
-'Other' includes locations with fewer than 32 listings. Prices are displayed in GBP, based on the assumption that all listings are denominated in the local currency (UK). These explanations are provided here for clarity and will be omitted in subsequent visualizations. <br><br>
+"Other" includes locations with fewer than 32 listings. Prices are displayed in GBP, based on the assumption that all listings are denominated in the local currency (UK). These explanations are provided here for clarity and will be omitted in subsequent visualizations. <br><br>
 
 #### **Brief Interpretation:**
 
@@ -219,9 +219,14 @@ ggplot(data = rvp_airbnb, aes(x = factor(room_type), y = ave_price)) +
   theme_minimal()
 ```
 
+#### **Note:**
+
+The "hotel room" category has only 4 listings in the dataset, and the average price shown here may not be representative.
+
 #### **Brief Interpretation:**
 
-Entire homes/apartments averaged £126.7, reflecting their size and capacity. Hotel rooms (£79.8) were about 1.6 times more expensive than private rooms (£49.9), likely due to more consistent service and facilities. <br><br>
+Entire homes/apartments averaged £126.7, reflecting their size and capacity. While hotel rooms (£79.8) were about 1.6 times more expensive than private rooms (£49.9), this is likely due to the very small number of observations (n = 4), and may not reflect the actual market trend.
+<br><br>
 
 #### **Linear Regression Analysis:**
 
@@ -275,7 +280,7 @@ ggplot(data = tile_rnsvp, aes(x = review_score_group, y = review_num_group, fill
 
 #### **Note:**
 
-'Number of Reviews' groups ("Very Few", "Few", "Moderate", "Many") and 'Review Scores' groups ("Low", "Fair", "Good", "High") were created by dividing their respective distributions into quartiles (0.25 increments) to reduce the impact of skewed data. <br><br>
+"Number of Reviews" groups ("Very Few", "Few", "Moderate", "Many") and "Review Scores" groups ("Low", "Fair", "Good", "High") were created by dividing their respective distributions into quartiles (0.25 increments) to reduce the impact of skewed data. <br><br>
 
 #### **Brief Interpretation:**
 
@@ -299,7 +304,7 @@ Based on the results of the foregoing analyses, it can be concluded that the num
 
 ### **Analytical Summary and Insights:**
 
--   Visualizations revealed clear pricing trends across location and room type categories. For instance, areas like Hotwells & Harbourside exhibited significantly higher average prices, and entire homes/apartments were priced higher than other room types.
+-   Visualizations revealed clear pricing trends across location and room type categories. For instance, areas like Hotwells & Harbourside exhibited significantly higher average prices, and entire homes/apartments were priced higher than other room types. It should be noted, however, that the "hotel room" category contained only a few listings, making its average price potentially unreliable.
 
 -   While the regression models showed limited explanatory power—location (R² ≈ 4%), room type (R² ≈ 17.5%), and review metrics (R² ≈ 1.3%)—the visual trends observed in certain neighborhoods may still hold practical implications for host pricing strategies, particularly in areas with advantageous locations or perceived desirability.
 
@@ -325,6 +330,8 @@ Based on the results of the foregoing analyses, it can be concluded that the num
 
 -   Temporal variables, such as booking season or listing age, were not included in the analysis, potentially overlooking short-term or time-sensitive pricing effects.
 
+-   The "hotel room" category included only four listings, which limited the reliability of any conclusions drawn about this room type.
+
 -   Categorical groupings (e.g., room type or review labels) may oversimplify nuanced differences, and the aggregation method may have masked variability within groups.
 
 -   Outlier handling was limited, and some high-price listings with atypical characteristics may have distorted overall trends despite visual filtering.
@@ -340,5 +347,4 @@ Based on the results of the foregoing analyses, it can be concluded that the num
 
 -   Explore qualitative factors, such as host experience or guest satisfaction, potentially through sentiment analysis of reviews, to supplement numerical data with richer insights. 
 <br><br>
-
 
