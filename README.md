@@ -51,3 +51,8 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
    - Project 1: Uses `nycflights13` package data.
    - Project 2: Uses `readr` for CSV loading.
 3. Open the `.Rmd` file and knit to HTML.
+
+
+## Changelog
+
+- [`CHANGELOG.md`](CHANGELOG.md)
