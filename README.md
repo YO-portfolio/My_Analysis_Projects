@@ -24,6 +24,7 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 #### 日本語版(Japanese Version)
 - [`ニューヨーク市内の空港における遅延率に関する分析.Rmd`](ニューヨーク市内の空港における遅延率に関する分析.Rmd)：Rマークダウン形式
 - [`ニューヨーク市内の空港における遅延率に関する分析.html`](ニューヨーク市内の空港における遅延率に関する分析.html)：HTML形式
+- [`ニューヨーク市の空港における遅延率とフライト数：２０１３年概要`](https://public.tableau.com/app/profile/yoshiki.okada7932/viz/_17550709740230/1_1)：ダッシュボード（タブロー）
 
 ### Project 2:
 #### English Version
@@ -34,6 +35,7 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 #### 日本語版(Japanese Version)
 - [`イギリス・ブリストル市におけるAirbnbの宿泊価格に関する分析.Rmd`](イギリス・ブリストル市におけるAirbnbの宿泊価格に関する分析.Rmd)：Rマークダウン形式
 - [`イギリス・ブリストル市におけるAirbnbの宿泊価格に関する分析.html`](イギリス・ブリストル市におけるAirbnbの宿泊価格に関する分析.html)：HTML形式
+- [``]()：ダッシュボード（タブロー）
 
 ## Data Source and Licenses
 
