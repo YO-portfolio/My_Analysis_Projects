@@ -28,7 +28,8 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 ### Project 2:
 #### English Version
 - [`Airbnb_Bristol_Price_Analysis.Rmd`](https://github.com/YO-portfolio/My_Analysis_Projects/blob/main/Airbnb_Bristol_Price_Analysis.Rmd) : R Markdown analysis report
-- [`Airbnb_Bristol_Price_Analysis.html`](Airbnb_Bristol_Price_Analysis.html) : Rendered HTML report 
+- [`Airbnb_Bristol_Price_Analysis.html`](Airbnb_Bristol_Price_Analysis.html) : Rendered HTML report
+- [`Price of Airbnb Listings in Bristol, UK - Overview`](https://public.tableau.com/app/profile/yoshiki.okada7932/viz/PriceofAirbnbListingsinBristolUK-Overview/1_1#1) : Tableau dashboard
 
 #### 日本語版(Japanese Version)
 - [`イギリス・ブリストル市におけるAirbnbの宿泊価格に関する分析.Rmd`](イギリス・ブリストル市におけるAirbnbの宿泊価格に関する分析.Rmd)：Rマークダウン形式
