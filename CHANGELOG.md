@@ -20,3 +20,11 @@ Each project has its own detailed changelog linked below, with versions availabl
   
 ### 日本語版(Japanese Version)
 - [`Project_2_変更履歴`](Project_2_変更履歴)
+
+## Project 3:
+
+### English Version
+- [`Project_3_Changelog`](Project_3_Changelog)
+  
+### 日本語版(Japanese Version)
+- [`Project_3_変更履歴`](Project_3_変更履歴)
