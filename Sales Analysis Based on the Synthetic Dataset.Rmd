@@ -452,7 +452,7 @@ average_purchase_quantity <- sales_use %>%
 
 ```
 
-```{r line raphs, include=FALSE}
+```{r line graphs, include=FALSE}
 # line chart: quantity sold
 sold_quantity_graph <- ggplot(data = monthly_quantities) + 
   geom_line(aes(x = date, y = quantity_sold_by_category, color = product_category), linewidth = 1) +
@@ -536,7 +536,7 @@ avg_sold_product_price <- ggplot() +
                date_breaks = "1 month") + 
   labs(title = "Average Sold Product Price by Month",
        x = "Month",
-       y = "Avg. Sold Price") + 
+       y = "Avg. Sold Price ($)") + 
   theme(plot.title.position = "plot",
         plot.title = element_text(hjust = 0.45))
 
