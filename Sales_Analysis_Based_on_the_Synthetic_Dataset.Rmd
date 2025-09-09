@@ -1,0 +1,626 @@
+---
+title: "Sales Analysis Based on the Synthetic Data"
+author: "Yoshiki Okada"
+date: "2025-08-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("tidyverse")  
+library("conflicted")
+library("skimr")
+library("patchwork")
+
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **1. Introduction**
+
+### **1.1. Context**
+
+This report analyzes sales patterns of Imaginary Retail Company using the synthetic annual sales dataset. The analysis focuses on product categories with significant monthly sales fluctuations and investigates the impact of customer attributes on sales. Leveraging the insights derived from the analysis, practical implications for enhancing sales performance are presented. 
+<br><br>
+
+### **1.2. Data Source and Overview**
+
+The data used in this analysis is publicly available from Kaggle, an independent online platform specializing in data science and machine learning.
+
+The specific dataset used is **Retail Sales Dataset** (Talib, 2023), which can be downloaded [`here`](https://www.kaggle.com/datasets/mohammadtalib786/retail-sales-dataset/data).
+
+**Dataset License**: [`CC0: Public Domain`](https://creativecommons.org/publicdomain/zero/1.0/) 
+<br><br>
+
+**Main Variables on the dataset below:**
+
+-   Transaction.ID: Unique identifier for each individual transaction.
+-   Date: The date of each transaction(YYYY-MM-DD).
+-   Customer.ID: Unique identifier for each individual customer.
+-   Gender: Indicates the customer's gender(Male, Female).
+-   Age: Customer's age(18-64).
+-   Product.Category: Category of the product.
+-   Quantity: Number of units purchased.
+-   Price.per.Unit: Price per unit.
+-   Total.Amount: Total amount of each transaction.
+
+Unit Price and Total Amount do not include currency symbols in the original data; for clarity, they are consistently treated as US dollars ($) in this report. 
+<br><br>
+
+## **2. Data Cleaning and Preprocessing**
+
+The data types and values of each column were checked, confirming that there were no missing values or outliers.
+
+Consistency between columns was then checked, with no issues observed.
+
+To enable monthly aggregation, the transaction date was converted to a date type, and separate columns for year, month, day were added.
+
+Additionally, some column names were simplified and made more intuitive to facilitate analysis (e.g. Transaction.ID -> transaction_id, Price.Per.Unit -> unit_price, etc).
+
+Finally, the unnecessary column was removed to create a dataset suitable for future aggregation, while a backup copy of the cleaned dataset was retained independently to ensure recoverability.
+
+```{r}
+# file loading
+sales_df <- read.csv("retail_sales_dataset.csv")
+
+# data type conversion
+sales_date_df <- sales_df %>%
+  mutate(date_num = as.Date(Date),
+         year = format(date_num, "%Y"),　
+         month = format(date_num, "%m"), 
+         day = format(date_num, "%d")) %>% 
+  select(Transaction.ID, Date, year, month, day, everything())
+
+# renaming
+sales_rename <- sales_date_df %>%
+  rename(transaction_id = Transaction.ID, 
+         customer_id = Customer.ID, 
+         product_category = Product.Category, 
+         unit_price = Price.per.Unit, 
+         total_amount = Total.Amount)
+
+# removing and retaining 
+sales_use <- sales_rename %>%
+  select(-date_num)
+
+
+```
+
+<br><br>
+
+## **3. Analytical Methods**
+
+This analysis applied descriptive statistics, visualization, and cross-tabulation to investigate factors affecting sales fluctuations.
+
+**Methods Used and Their Purposes:**
+
+-   **Overview of sales trends:** An area chart was used to visualize overall monthly sales, along with each product category's sales, providing an intuitive view of general trends.
+
+-   **Product category comparison:** Line chart was performed to examine and compare monthly sales fluctuations across product categories.
+
+-   **Customer attributes analysis:** Stacked bar chart was utilized to observe the composition of monthly transactions by customer attributes.
+
+-   **Number of customers and average transaction amount:** Line charts were created to separate the effects of the "number of customers" and "average transaction amount," enabling independent analysis of each factor on sales fluctuations.
+
+-   **Quantity sold and average purchase quantity:** Line chart and descriptive statistics were applied to further decompose the "average transaction amount" contributing to sales fluctuations.
+
+-   **Average sold product price and product ratio:** Line and stacked bar chart were produced respectively to further investigate the "average transaction amount" and identify its underlying causes of fluctuation.
+
+Regarding statistical analysis, regression analysis was considered: however, due to the insufficient sample size, statistical significance could not be confirmed and, therefore, it is not included in the conclusions of this report. 
+<br><br>
+
+## **4. Results and Insights**
+
+The analysis begins with a summary of overall sales trends, followed by visualizations of factors affecting sales fluctuations. <br><br>
+
+### **4.1. Overall Trend**
+
+As a first step toward improving revenue, overall sales trends are examined to inform subsequent analysis.
+
+```{r overall trend, include=FALSE}
+# data aggregation
+overall_sales <- sales_use %>%
+  group_by(month, product_category) %>%
+  summarise(monthly_category_sales = sum(total_amount, na.rm = TRUE),
+            .groups = "drop") %>%    
+  group_by(month) %>%
+  mutate(monthly_total_sales = sum(monthly_category_sales),
+         date = as.Date(paste0("2023-", month, "-01"))) %>%
+  select(date, month, everything())
+
+
+```
+
+**Area Chart**
+
+```{r graph: overall trend}
+# area chart
+ggplot(data = overall_sales) + 
+  geom_area(aes(x = date, 
+                y = monthly_category_sales, 
+                fill = product_category), 
+            alpha = 0.5) +
+  geom_line(aes(x = date, 
+                y = monthly_total_sales), 
+            alpha = 0) +
+  geom_text(aes(x = date, 
+                y = monthly_total_sales, 
+                label = paste0("$", round((monthly_total_sales), 1))),
+            vjust = -0.5, 
+            size = 3, 
+            color = "black") +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month") +
+  scale_y_continuous(labels = scales::dollar) +
+  labs(title = "Overall Sales Trend",
+       x = "Month",
+       y = "Monthly Sales ($)",
+       fill = "Product Category") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.4))
+
+
+```
+
+**Brief interpretation:**
+
+-   Overall monthly sales fluctuate around $12,000 for most months.
+
+-   From June to August, sales remain relatively stable compared to other months.
+
+-   Sales in May exceed those of both adjacent months by over $16,000, representing the highest sales of the year.
+
+-   Sales fluctuations from September to October are substantial, approaching the levels seen in April and May; however, from October onward, fluctuations remain within typical monthly ranges.
+
+Based on these observations, May recorded the highest sales and most pronounced fluctuations. Thus, the subsequent analysis focuses on May sales. Sales variations by product category are then examined to identify key drivers. 
+<br><br>
+
+### **4.2. Focused Analysis** 
+
+
+#### **Product Trends**
+
+**Hypothesis:** The notable increase in May sales is driven by fluctuations in specific product categories.
+<br><br>
+
+**Line Chart**
+
+```{r product trends, echo=FALSE}
+# line chart
+ggplot(data = overall_sales) + 
+  geom_line(data = overall_sales %>%
+              filter(product_category != "Electronics"), 
+            aes(x = date, 
+                y = monthly_category_sales, 
+                color = product_category), 
+            linetype = "dashed",
+            linewidth = 0.8) +
+  geom_line(data = overall_sales %>%
+              filter(product_category == "Electronics"), 
+            aes(x = date, 
+                y = monthly_category_sales, 
+                color = product_category), 
+            linewidth = 1.5) +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month")  +
+  scale_y_continuous(labels = scales::dollar) +
+  labs(title = "Sales Trends by Product Category",
+       x = "Month",
+       y = "Monthly Sales ($)",
+       color = "Product Category") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.4))
+
+
+```
+
+**Brief interpretation:**
+
+-   Overall, all product categories show substantial sales fluctuations.
+
+-   Electronics demonstrates the most pronounced volatility throughout the year.
+
+-   Increases in sales across all product categories are observed from April to May and from September to October.
+
+-   Decreases in sales across all product categories are observed from May to June and from August to September.
+
+These observations suggest that the surge in overall sales in May is largely attributable to Electronics. Therefore, the analysis then examines factors behind May sales fluctuations in this category. 
+<br><br>
+
+#### **Customer Attributes**
+
+**Hypothesis:** The pronounced sales fluctuations in Electronics in May are driven by specific customer attributes.
+
+**Note:**
+To avoid bias, this analysis considered only age groups as customer attributes, excluding gender. Age groups were defined based on life stages.
+<br><br>
+
+```{r customer attributes, echo=FALSE}
+# age_group: Youth(18-24), young adult(25-34), adult(35-44), mature adult(45-54), senior(55-64)
+sales_age <- sales_use %>%
+  mutate(age_group = case_when(Age >= 18 & Age < 25 ~ "Youth",
+                               Age >= 25 & Age < 35 ~ "Young Adult",
+                               Age >= 35 & Age < 45 ~ "Adult",
+                               Age >= 45 & Age < 55 ~ "Mature Adult",
+                               TRUE ~ "Senior"))
+
+
+customer_attributes <- sales_age %>%
+  group_by(month, age_group) %>%
+  summarise(age_count = n(), 
+            .groups = "drop") %>%
+  group_by(month) %>%
+  mutate(total_count = sum(age_count),　　
+         age_ratio = age_count/total_count,
+         date = as.Date(paste0("2023-", month, "-01"))) %>%
+  ungroup() %>%
+  mutate(age_group = factor(age_group, levels = c("Youth", "Young Adult", "Adult", "Mature Adult", "Senior"))) %>%
+  select(date, month, everything()) %>% 
+  arrange(month, factor(age_group, levels = c("Youth", "Young Adult", "Adult", "Mature Adult", "Senior")))
+  
+
+
+
+```
+
+**Stacked Bar Chart**
+
+```{r graph: customer attributes, echo=FALSE}
+# stacked bar chart
+ggplot(data = customer_attributes) +
+  geom_col( 
+            aes(x = date, 
+                y= age_ratio, 
+                fill = age_group)) +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month") + 
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Monthly Customer Age Composition",
+       x = "Month",
+       y = "Share of Customers (%)",
+       fill = "Age Group",
+       caption = "Age Group: Youth (18-24), Young Adult (25-34), Adult (35-44), Mature Adult (45-54), Senior (55-64)") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.4))
+
+
+```
+
+**Brief interpretation:**
+
+-   Age group composition fluctuates by around ±8% throughout the year.
+
+-   "Youth" consistently represents the smallest proportion among all age groups.
+
+-   By age group, the largest fluctuations are observed in:
+
+    -   Youth: October - November
+    -   Young Adult: November - December
+    -   Adult: March - April
+    -   Mature Adult: August - September
+    -   Senior: February - March
+
+-   The composition ratios are relatively balanced across groups for all months (maximum share 30%, HHI = 0.21), with no clear dominance observed.
+
+From the observations above, no specific customer attribute can explain the May sales surge in Electronics. Furthermore, over the year, changes in age group composition do not indicate a clear impact on category sales. Therefore, no specific factors contributing to sales fluctuations in May can be identified within Electronics alone. Accordingly, the analysis shifts to examining the drivers of overall May sales across all product categories.  
+<br><br>
+
+#### **Number of Customers and Average Transaction Amount**
+
+**Hypothesis:** The sales surge in May is driven by the number of customers and the average transaction amount. 
+<br><br>
+```{r number of customers and average transaction amount, echo=FALSE}
+# number of customers
+monthly_customers <- sales_use %>%
+  group_by(month) %>%
+  summarise(customer_count = n_distinct(customer_id)) %>% 
+  mutate(date = as.Date(paste0("2023-", month, "-01"))) %>%
+  select(date, month, everything())
+
+customer_labels <- monthly_customers %>%
+  filter(customer_count %in% c(max(customer_count), min(customer_count)) | date %in% as.Date(c("2023-05-01"))) %>%
+  mutate(vjust = case_when(customer_count == min(customer_count) ~ 1.2,
+                              TRUE ~ -1)) 
+
+
+# average transaction amount
+monthly_transactions <- sales_use %>%
+  group_by(month) %>%
+  summarise(monthly_sales = sum(total_amount, na.rm = TRUE),
+            transaction_count = n_distinct(transaction_id)) %>%
+  mutate(avg_sales_per_transaction = monthly_sales/transaction_count,
+         date = as.Date(paste0("2023-", month, "-01"))) %>%
+  select(date, month, everything()) %>%
+  ungroup() %>%
+  mutate(across(avg_sales_per_transaction, ~round(.x, 2)))
+
+
+transaction_labels <- monthly_transactions %>% 
+  filter(avg_sales_per_transaction %in% c(max(avg_sales_per_transaction), min(avg_sales_per_transaction)) | date %in% as.Date(c("2023-05-01"))) %>%
+  mutate(vjust = case_when(avg_sales_per_transaction == min(avg_sales_per_transaction) ~ 1.2,
+                              TRUE ~ -1))
+
+
+
+```
+
+**Line Charts**
+
+```{r graphs, fig.width=10,  echo=FALSE}
+# line chart: number of customers
+number_of_customers <- ggplot(
+  data = monthly_customers, 
+  aes(x = date, 
+      y = customer_count)) + 
+  geom_line(color = "blue", 
+            linewidth = 1.5) +
+  geom_text(data = customer_labels,
+            aes(label = customer_count, 
+                vjust = vjust), 
+            size = 3, 
+            color = "black") +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month") + 
+  labs(title = "Monthly Customers",
+       x = "Month",
+       y = "Number of Customers") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.6))
+
+
+
+# line chart: average transaction amount
+average_transaction_amount <- ggplot(
+  data = monthly_transactions, 
+  aes(x = date, 
+      y = avg_sales_per_transaction)) +
+  geom_line(color = "lightblue3", 
+            linewidth = 1.5) +
+  geom_text(data = transaction_labels,
+            aes(label = paste0("$", round((avg_sales_per_transaction), 2)), 
+                vjust = vjust), 
+            size = 3, 
+            color = "black") +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month") +
+  scale_y_continuous(labels = scales::dollar) + 
+  labs(title = "Average Transaction Amount by Month",
+       x = "Month",
+       y = "Avg. Amount ($)") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.6))
+
+
+number_of_customers | average_transaction_amount
+
+
+```
+
+
+**Brief interpretation:**
+
+- Number of Customers:
+
+  - Customer numbers fluctuate significantly throughout the year. 
+  
+  - The peak is observed in May (105 customers), while the lowest point is in September (65 customers).
+  
+  - From April to May, customer numbers increased by 19, followed by a sharp decline of 28 from May to June, highlighting May as a key month. 
+  
+- Average Transaction Amount:
+
+  - Avg. transaction amounts show strong volatility throughout the year, with values polarized between highs and lows. 
+  
+  - The highest amount is observed in February ($518.35), while the lowest is in September ($363.38). 
+  
+  - In May, the amount reached $506.19, the second-highest after February. 
+  
+  - From April to May, the amount increased by $112.35, followed by a decrease of $29.37 from May to June. 
+  
+These observations indicate that both the number of customers and the average transaction amount contributed to the May sales surge. Neither factor alone is sufficient to fully explain the fluctuation. 
+Customer numbers closely mirror the overall sales trend; however, due to the nature of the data, further breakdown is not feasible. For avg. transaction amounts, deviations from overall sales patterns are observed, most notably in February, when the amount exceeded May. Therefore, analyzing the drivers of avg. transaction amounts is the next necessary step. 
+<br><br>
+
+
+
+#### **Quantity Sold and Average Purchase Quantity**
+
+**Hypothesis:** Variations in avg. transaction amounts are driven by sold quantity and average purchase quantity; in other words, higher sold quantity may have led to higher avg. transaction amounts.
+<br><br>
+
+```{r quantity sold and average purchase quantity, include=FALSE}
+# quantity sold
+monthly_quantities <- sales_use %>%
+  group_by(month, product_category) %>%
+  summarise(quantity_sold_by_category = sum(Quantity, na.rm = TRUE),
+            .groups = "drop") %>%
+  group_by(month) %>%
+  mutate(total_quantity_sold = sum(quantity_sold_by_category, na.rm = TRUE), 
+         date = as.Date(paste0("2023-", month, "-01"))) %>%
+  select(date, month, everything())
+
+
+# average purchase quantity
+average_purchase_quantity <- sales_use %>%
+  group_by(month) %>%
+  summarise(total_quantity = sum(Quantity, na.rm = TRUE),
+            transaction_count = n_distinct(transaction_id)) %>%
+  mutate(avg_quantity_per_transaction = total_quantity/transaction_count,
+         date = as.Date(paste0("2023-", month, "-01"))) %>%
+  select(date, month, everything())
+
+
+```
+
+```{r line graphs, include=FALSE}
+# line chart: quantity sold
+sold_quantity_graph <- ggplot(data = monthly_quantities) + 
+  geom_line(aes(x = date, y = quantity_sold_by_category, color = product_category), linewidth = 1) +
+  geom_line(aes(x = date, y = total_quantity_sold), linewidth = 1) +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month") + 
+  labs(title = "Sold Quantity by Month",
+       x = "Month",
+       y = "Sold Quantity") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.6))
+
+
+# line chart: average purchase quantity
+avg_purchase_quantity_graph <- ggplot() +
+  geom_line(data = average_purchase_quantity, 
+            aes(x = date, 
+                y = avg_quantity_per_transaction), 
+            linewidth = 1) +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month") + 
+  labs(title = "Average Purchase Quantity by Month",
+       x = "Month",
+       y = "Avg. Purchase Quantity") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.6))
+
+
+sold_quantity_graph | avg_purchase_quantity_graph
+
+
+```
+
+**Brief interpretation:**
+
+Descriptive statistics show that avg. purchase quantity remains largely stable throughout the year (mean = 2.52, sd = 0.11), indicating it is unlikely to be a significant driver. Meanwhile, fluctuations in sold quantity mirror overall sales patterns, suggesting that their variations are attributable to customer number. Therefore, neither sold quantity nor avg. purchase quantity sufficiently explains fluctuations in avg. transaction amounts. Consequently, there is little analytical value in visualizing their metrics, and such visualizations are omitted. Based on these observations, variations in avg. transaction amounts are likely driven by volatility in the pricing aspect.
+<br><br>
+
+
+#### **Average Sold Product Price and Product Ratio**
+
+**Hypothesis:** Variations in avg. transaction amounts are driven by the combined effect of average selling prices by product category and their respective sales ratios. 
+
+<br><br>
+
+```{r average sold product price and product ratio, echo=FALSE}
+# average sold product price
+monthly_prices <- sales_use %>%
+  group_by(month, product_category) %>%
+  summarise(avg_sold_price = mean(unit_price, na.rm = TRUE),
+            .groups = "drop") %>%
+  mutate(date = as.Date(paste0("2023-", month, "-01"))) %>%
+  select(date, month, everything())
+
+
+
+
+# product ratio
+monthly_ratios <- monthly_quantities %>% 
+  mutate(product_ratio = quantity_sold_by_category/total_quantity_sold) %>% 
+  rename(quantity_sold_by_product = quantity_sold_by_category)
+  
+
+
+
+
+
+
+```
+
+**Line and Stacked Bar Chart**
+
+```{r line and stacked bar graphs, fig.width=12,  echo=FALSE}
+# line chart: average sold product price
+
+avg_sold_product_price <- ggplot() +
+  geom_line(data = monthly_prices, 
+            aes(x = date, y = avg_sold_price, color = product_category), 
+            linewidth = 1) +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month") + 
+  labs(title = "Average Sold Product Price by Month",
+       x = "Month",
+       y = "Avg. Sold Price ($)") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.45))
+
+
+
+# stacked bar chart: product ratio
+product_ratio <- ggplot() +
+  geom_col(data = monthly_ratios,
+           aes(x = date, 
+                y= product_ratio, 
+                fill = product_category)) +
+  scale_x_date(date_labels = "%m", 
+               date_breaks = "1 month") + 
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Monthly Product Ratio",
+       x = "Month",
+       y = "Ratio (%)",
+       fill = "Product Category") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.45))
+
+avg_sold_product_price / product_ratio
+
+
+```
+<br><br>
+
+**Brief interpretation:**
+
+First, focusing on the months with pronounced fluctuations from the previous month, March (decrease) and October (increase) stand out. 
+In March, Beauty records its highest avg. selling price, but because its sales ratio is small, the impact on the avg. transaction amount remains limited. Clothing, which accounts for about 60% of sales ratio, has its second-lowest avg. selling price of the year, while Electronics records its third-lowest. As a result, the avg. transaction amount declines. 
+In October, prices increase across all product categories compared to the previous month. Especially Beauty, which shows a substantial increase and reaches a high price, combined with its higher sales ratio, contributed to a notable rise in the avg. transaction amount. 
+
+Secondly, in May, which records the second-highest avg. transaction amount following February, both Electronics (highest level) and Clothing (third-highest level) maintain high avg. selling prices, and their sales ratios (approximately 37.5% each) contribute to the elevated avg. transaction amount. 
+
+Therefore, it can be concluded that fluctuations in the avg. transaction amounts are driven by the combined effects of avg. selling price by product category and their respective sales ratios. 
+
+Note: No clear factor can be identified for February, which records the highest avg. transaction amount. Further analysis on this point is considered beyond the scope of this report. 
+<br><br>
+
+
+## **5. Conclusion**
+
+Based on the analysis, its results highlight several important points:
+<br><br>
+
+**Key Findings**
+
+- Sales fluctuations are driven by the "number of customers" and the "average transaction amount", rather than customer attributes or specific product categories.
+
+- Variations in the avg. transaction amounts result from the combined effects of avg. selling prices by product category and their respective sales ratios, while the average purchase quantity does not contribute significantly.
+
+- The notable sales growth in Electronics in May is attributable to the simultaneous increase in both avg. selling price and sales ratio. 
+<br><br>
+
+**Implications**
+
+- For enhancing sales performance, it may be recommended to focus on initiatives that increase customer numbers and address fluctuations in the avg. transaction amounts. 
+
+- Changes in avg. selling prices and sales ratios of specific product categories strongly influence the avg. transaction amounts. Monitoring these factors may help to improve the accuracy of sales forecasts. 
+
+- Such Situations, where both avg. selling prices and sales ratios increase concurrently, could serve as a critical signal for potential sales expansion. 
+
+Based on these insights, collaboration with the marketing and product planning departments may be recommended to develop initiatives that leverage variations in avg. selling prices and sales ratios of key product categories. 
+<br><br>
+
+**Limitations**
+
+- The dataset consists of only 1,000 records, which is insufficient to verify statistical significance. 
+
+- As the dataset is synthetic and based on an imaginary retail company, surrounding geographic information is missing, limiting analysis of customer numbers, customer attributes, and seasonality. 
+
+- Data on cost prices are not available, preventing consideration of profit margins by product category.
+<br><br>
+
+**Future Work**
+
+From these limitations above, future analyses could provide more practical insights by incorporating the following perspectives:
+
+- Increasing the number of records in the dataset and reapplying statistical analysis. 
+
+- Integrating geographic data to examine customer numbers and customer attributes in detail, and considering seasonal effects based on locational information. 
+
+- Including cost price data to analyze profit margins and identify factors that contribute more directly to key performance indicators (KPIs).
+<br><br>
+
+
