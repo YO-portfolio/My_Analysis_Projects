@@ -12,6 +12,9 @@ Exploration of flight delay patterns by month and time of day at New York City a
 ### Project 2: Airbnb Price Analysis in Bristol
 Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 
+### Project 3: Imaginary Retail Company's Sales Analysis 
+Sales fluctuations Analysis at Imaginary Retail Company with business implications.
+
 
 ## Files
 
@@ -37,6 +40,17 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 - [`イギリス・ブリストル市におけるAirbnbの宿泊価格に関する分析.html`](イギリス・ブリストル市におけるAirbnbの宿泊価格に関する分析.html)：HTML形式
 - [`イギリス・ブリストル市のAirbnb宿泊価格の概要（２０２５年第一四半期）`](https://public.tableau.com/app/profile/yoshiki.okada7932/viz/Airbnb_17551505374100/1_1)：ダッシュボード（タブロー）
 
+### Project 3: 
+#### English Version
+- [`Sales Analysis Based on the Synthetic Dataset.Rmd`](Sales Analysis Based on the Synthetic Dataset.Rmd) : R Markdown analysis report  
+- [`Sales-Analysis-Based-on-the-Synthetic-Dataset.html`](Sales-Analysis-Based-on-the-Synthetic-Dataset.html) : Rendered HTML report
+
+#### 日本語版(Japanese Version)
+- [`架空小売会社における売上分析（２０２３年）.Rmd`](架空小売会社における売上分析（２０２３年）.Rmd)：Rマークダウン形式
+- [`架空小売会社における売上分析（２０２３年）.html`](架空小売会社における売上分析（２０２３年）.html)：HTML形式
+
+
+
 ## Data Source and Licenses
 
 ### Project 1: 
@@ -47,12 +61,17 @@ Analysis of factors influencing Airbnb listing prices in Bristol, UK.
 - Data from Inside Airbnb (Bristol) [`listings.csv.gz`](https://insideairbnb.com/get-the-data/)
 - Data License: CC BY 4.0
 
+### Project 3:
+- Data from Kaggle [`Retail Sales Dataset`](https://www.kaggle.com/datasets/mohammadtalib786/retail-sales-dataset/data)
+- Data License: CC0 (Public Domain)
+
 ## How to Reproduce
 
 1. Install R and RStudio.
-2. Install required packages: `tidyverse`, `skimr`.
+2. Install required packages: `tidyverse`, `skimr`, `patchwork`.
    - Project 1: Uses `nycflights13` package data.
    - Project 2: Uses `readr` for CSV loading.
+   - Project 3: Uses `readr` for CSV loading.
 3. Open the `.Rmd` file and knit to HTML.
 
 
