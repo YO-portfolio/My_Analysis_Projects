@@ -42,8 +42,8 @@ Sales fluctuations Analysis at Imaginary Retail Company with business implicatio
 
 ### Project 3: 
 #### English Version
-- [`Sales Analysis Based on the Synthetic Dataset.Rmd`](Sales Analysis Based on the Synthetic Dataset.Rmd) : R Markdown analysis report  
-- [`Sales-Analysis-Based-on-the-Synthetic-Dataset.html`](Sales-Analysis-Based-on-the-Synthetic-Dataset.html) : Rendered HTML report
+- [`Sales_Analysis_Based_on_the_Synthetic_Dataset.Rmd`](Sales_Analysis_Based_on_the_Synthetic_Dataset.Rmd) : R Markdown analysis report  
+- [`Sales_Analysis_Based_on_the_Synthetic_Dataset.html`](Sales_Analysis_Based_on_the_Synthetic_Dataset.html) : Rendered HTML report
 
 #### 日本語版(Japanese Version)
 - [`架空小売会社における売上分析（２０２３年）.Rmd`](架空小売会社における売上分析（２０２３年）.Rmd)：Rマークダウン形式
